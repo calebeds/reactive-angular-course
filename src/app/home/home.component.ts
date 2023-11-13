@@ -23,9 +23,9 @@ import { CoursesService } from "../services/courses.service";
   styleUrls: ["./home.component.css"],
 })
 export class HomeComponent implements OnInit {
-  beginnerCourses: Course[];
+  beginnerCourses$: Observable<Course[]>;
 
-  advancedCourses: Course[];
+  advancedCourses$: Observable<Course[]>;
 
   constructor(
     private coursesService: CoursesService,
@@ -33,17 +33,21 @@ export class HomeComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.coursesService.loadAllCourses().subscribe((res) => {
-      const courses: Course[] = res["payload"].sort(sortCoursesBySeqNo);
+    const courses$ = this.coursesService
+      .loadAllCourses()
+      .pipe(map((courses) => courses.sort(sortCoursesBySeqNo)));
 
-      this.beginnerCourses = courses.filter(
-        (course) => course.category == "BEGINNER"
-      );
+    this.beginnerCourses$ = courses$.pipe(
+      map((courses) =>
+        courses.filter((course) => course.category === "BEGINNER")
+      )
+    );
 
-      this.advancedCourses = courses.filter(
-        (course) => course.category == "ADVANCED"
-      );
-    });
+    this.advancedCourses$ = courses$.pipe(
+      map((courses) =>
+        courses.filter((course) => course.category === "ADVANCED")
+      )
+    );
   }
 
   editCourse(course: Course) {
