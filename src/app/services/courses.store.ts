@@ -38,6 +38,8 @@ export class CoursesStore {
     this.loading.showLoaderUntilCompleted(loadCourses$).subscribe();
   }
 
+  saveCourse(courseId: string, changes: Partial<Course>): Observable<unknown> {}
+
   filterByCategory(category: string): Observable<Course[]> {
     return this.courses$.pipe(
       map((courses) =>
