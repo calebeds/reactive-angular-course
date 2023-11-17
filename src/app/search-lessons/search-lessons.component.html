@@ -43,10 +43,10 @@
   </ng-container>
 
   <ng-template #detail>
-    <button mat-raised-button class="back-btn">
+    <button mat-raised-button class="back-btn" (click)="onBackToSearch()">
       <mat-icon>arrow_back_ios</mat-icon>
       Back to search
     </button>
-    <lesson></lesson>
+    <lesson [lesson]="activeLesson"></lesson>
   </ng-template>
 </div>
