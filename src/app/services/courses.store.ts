@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { BehaviorSubject, Observable, throwError } from "rxjs";
 import { Course, sortCoursesBySeqNo } from "../model/course";
-import { catchError, map, tap } from "rxjs/operators";
+import { catchError, map, shareReplay, tap } from "rxjs/operators";
 import { HttpClient } from "@angular/common/http";
 import { LoadingService } from "../loading/loading.service";
 import { MessagesService } from "../messages/messages.service";
@@ -38,7 +38,32 @@ export class CoursesStore {
     this.loading.showLoaderUntilCompleted(loadCourses$).subscribe();
   }
 
-  saveCourse(courseId: string, changes: Partial<Course>): Observable<unknown> {}
+  saveCourse(courseId: string, changes: Partial<Course>): Observable<unknown> {
+    const courses = this.subject.getValue();
+
+    const index = courses.findIndex((course) => course.id === courseId);
+
+    const newCourse: Course = {
+      ...courses[index],
+      ...changes,
+    };
+
+    const newCourses: Course[] = courses.splice(0);
+
+    newCourses[index] = newCourse;
+
+    this.subject.next(newCourses);
+
+    return this.httpClient.put(`/api/courses/${courseId}`, changes).pipe(
+      catchError((err) => {
+        const message = "Could not save course";
+        console.log(message, err);
+        this.messages.showErrors(message);
+        return throwError(err);
+      }),
+      shareReplay()
+    );
+  }
 
   filterByCategory(category: string): Observable<Course[]> {
     return this.courses$.pipe(
